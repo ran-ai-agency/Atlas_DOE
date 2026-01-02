@@ -1,0 +1,36 @@
+# Environment variables
+.env
+
+# Google OAuth credentials
+credentials.json
+token.json
+
+# Temporary/intermediate files
+.tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code settings (contains API keys)
+.claude/settings.json
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
