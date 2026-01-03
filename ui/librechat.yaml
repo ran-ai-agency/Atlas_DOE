@@ -1,8 +1,6 @@
 # ===========================================
 # ATLAS - LibreChat Configuration
 # ===========================================
-# This file configures the Atlas UI behavior,
-# available models, and MCP integrations.
 
 version: 1.1.7
 
@@ -12,128 +10,209 @@ cache: true
 # Interface Customization
 # ===========================================
 interface:
-  # Hide the model/provider info from users
   showModelInfo: false
-
-  # Custom app title
   appTitle: Atlas
-
-  # Privacy policy and terms (optional)
-  # privacyPolicy:
-  #   externalUrl: https://ran.ai/privacy
-  # termsOfService:
-  #   externalUrl: https://ran.ai/terms
 
 # ===========================================
 # Registration Settings
 # ===========================================
 registration:
   socialLogins: []
-  allowedDomains:
-    - "ran.ai"
-    - "ranai.agency"
 
 # ===========================================
 # Model Endpoints Configuration
 # ===========================================
 endpoints:
-  # Disable OpenAI (we only use Claude)
   openAI:
     disabled: true
 
-  # Disable other providers
   google:
-    disabled: true
-
-  gptPlugins:
     disabled: true
 
   assistants:
     disabled: true
 
-  # ===========================================
-  # Claude / Anthropic Configuration
-  # ===========================================
+  # Agents Endpoint - Pour créer des agents personnalisés
+  agents:
+    disabled: false
+    disableBuilder: false
+    allowedProviders:
+      - "anthropic"
+    recursionLimit: 25
+    maxRecursionLimit: 50
+    capabilities:
+      - "tools"
+      - "actions"
+      - "artifacts"
+      - "web_search"
+
   anthropic:
     disabled: false
-
-    # Custom title shown in UI
     title: "Atlas AI"
-
-    # Available models
     models:
       default:
         - "claude-sonnet-4-20250514"
         - "claude-opus-4-20250514"
         - "claude-3-5-haiku-20241022"
       fetch: false
-
-    # Model-specific settings
-    modelSpecs:
-      - name: "claude-sonnet-4-20250514"
-        displayName: "Atlas Standard"
-        description: "Balanced performance for everyday tasks"
-        default: true
-
-      - name: "claude-opus-4-20250514"
-        displayName: "Atlas Pro"
-        description: "Maximum capability for complex analysis"
-
-      - name: "claude-3-5-haiku-20241022"
-        displayName: "Atlas Express"
-        description: "Fast responses for quick questions"
-
-    # Default parameters
     titleModel: "claude-3-5-haiku-20241022"
-
-    # Token limits
     maxContextTokens: 200000
     maxOutputTokens: 8192
-
-    # Streaming enabled
     streamRate: 25
-
-  # ===========================================
-  # Custom Endpoints (for future expansion)
-  # ===========================================
-  custom: []
+    modelDisplayLabel: "Atlas"
 
 # ===========================================
-# MCP (Model Context Protocol) Servers
+# MCP Servers Configuration
 # ===========================================
 mcpServers:
-  # Notion Integration
-  notion:
-    type: "http"
-    url: "${MCP_NOTION_URL:-https://mcp.notion.com/mcp}"
-    headers:
-      Authorization: "Bearer ${MCP_NOTION_TOKEN}"
-      Notion-Version: "2022-06-28"
-    timeout: 30000
-
-  # Zoho CRM Integration
+  # Zoho CRM Integration (15 outils - léger)
   zoho-crm:
-    type: "http"
-    url: "${MCP_ZOHO_CRM_URL}"
-    params:
-      key: "${MCP_ZOHO_CRM_KEY}"
-    timeout: 30000
+    type: streamable-http
+    url: "https://ranaiagencymcpserver-110002203871.zohomcp.ca/mcp/message?key=24b2eccb52404a48493523ce75c970b5"
+    timeout: 60000
+    chatMenu: true
 
-  # Zoho Books Integration
-  zoho-books:
-    type: "http"
-    url: "${MCP_ZOHO_BOOKS_URL}"
-    params:
-      key: "${MCP_ZOHO_BOOKS_KEY}"
-    timeout: 30000
-
-  # Zoho Mail Integration
+  # Zoho Mail Integration (5 outils - léger)
   zoho-mail:
-    type: "http"
-    url: "${MCP_ZOHO_MAIL_URL}"
-    params:
-      key: "${MCP_ZOHO_MAIL_KEY}"
-    timeout: 30000
+    type: streamable-http
+    url: "https://zohomail-110002203871.zohomcp.ca/mcp/message?key=9659d07223d5ee608ac325269f952b5e"
+    timeout: 60000
+    chatMenu: true
+
+  # Zoho Cliq Integration (messagerie d'équipe)
+  zoho-cliq:
+    type: streamable-http
+    url: "https://zohocliq-110002203871.zohomcp.ca/mcp/message?key=9241f481c09d7a572947950e02f06fa5"
+    timeout: 60000
+    chatMenu: true
+
+  # Zoho Books Integration (57 outils - lourd, désactivé par défaut)
+  zoho-books:
+    type: streamable-http
+    url: "https://zohobooks-110002203871.zohomcp.ca/mcp/message?key=83dbcaeb92ce495f6db617540ecc6f90"
+    timeout: 60000
+    chatMenu: false
+
+  # Notion Integration (OAuth requis)
+  notion:
+    type: sse
+    url: "https://mcp.notion.com/sse"
+    headers:
+      Authorization: "Bearer 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"
+      Notion-Version: "2022-06-28"
+    timeout: 60000
+    chatMenu: false
+
+# ===========================================
+# Default System Prompt for Atlas
+# ===========================================
+modelSpecs:
+  enforce: true
+  prioritize: true
+  list:
+    - name: "claude-sonnet-4-20250514"
+      label: "Atlas Standard"
+      description: "Assistant intelligent pour la gestion quotidienne"
+      preset:
+        endpoint: "anthropic"
+        model: "claude-sonnet-4-20250514"
+        modelLabel: "Atlas"
+        greeting: "Bonjour! Je suis Atlas, votre assistant IA pour Ran.AI Agency. Comment puis-je vous aider?"
+        promptPrefix: |
+          Tu es Atlas, l'assistant IA de direction pour Ran.AI Agency.
+
+          IMPORTANT: Tu n'es PAS Claude. Tu es Atlas. Ne mentionne JAMAIS Anthropic ou Claude.
+          Quand on te demande qui tu es, réponds: "Je suis Atlas, votre assistant IA pour Ran.AI Agency."
+
+          Date et heure actuelles: {{current_date}}
+
+          Ton rôle: Assistant intelligent pour la gestion d'entreprise.
+
+          Tu as accès aux outils MCP suivants:
+          - Notion: Documentation, projets, notes de sessions GR International
+          - Zoho CRM: Contacts, prospects, deals (39 contacts, 2 deals gagnés)
+          - Zoho Books: Finances, factures, dépenses (organization_id: 110002033190)
+          - Zoho Mail: Emails et communications
+
+          IMPORTANT pour Zoho Books: Utilise TOUJOURS organization_id: "110002033190" dans les requêtes.
+
+          Tes capacités:
+          - Analyse financière et reporting via Zoho Books
+          - Gestion des contacts et prospects via Zoho CRM
+          - Documentation et gestion de projets via Notion
+          - Communications via Zoho Mail
+          - Planification stratégique
+          - Analyse de données
+
+          Règles:
+          - Réponds toujours en français
+          - Sois concis et orienté action
+          - Fournis des analyses structurées
+          - Propose des recommandations concrètes
+          - Utilise les outils MCP quand pertinent
+
+    - name: "claude-opus-4-20250514"
+      label: "Atlas Pro"
+      description: "Analyses complexes et stratégiques"
+      preset:
+        endpoint: "anthropic"
+        model: "claude-opus-4-20250514"
+        modelLabel: "Atlas Pro"
+        greeting: "Bonjour! Je suis Atlas Pro, votre assistant IA avancé pour les analyses stratégiques. Comment puis-je vous aider?"
+        promptPrefix: |
+          Tu es Atlas Pro, l'assistant IA stratégique pour Ran.AI Agency.
+
+          IMPORTANT: Tu n'es PAS Claude. Tu es Atlas Pro. Ne mentionne JAMAIS Anthropic ou Claude.
+
+          Date et heure actuelles: {{current_date}}
+
+          Ton rôle: Assistant stratégique pour analyses complexes.
+
+          Tu as accès aux outils MCP:
+          - Notion: Documentation complète, projets, historique
+          - Zoho CRM: Base clients et prospects
+          - Zoho Books: Données financières (organization_id: 110002033190)
+          - Zoho Mail: Communications
+
+          IMPORTANT pour Zoho Books: Utilise TOUJOURS organization_id: "110002033190" dans les requêtes.
+
+          Tes capacités avancées:
+          - Analyses financières approfondies
+          - Planification stratégique long terme
+          - Études de marché
+          - Optimisation des processus
+          - Rédaction de documents complexes
+
+          Règles:
+          - Réponds toujours en français
+          - Fournis des analyses détaillées et structurées
+          - Propose plusieurs scénarios quand pertinent
+          - Sois rigoureux dans tes recommandations
+
+    - name: "claude-3-5-haiku-20241022"
+      label: "Atlas Express"
+      description: "Réponses rapides pour questions simples"
+      preset:
+        endpoint: "anthropic"
+        model: "claude-3-5-haiku-20241022"
+        modelLabel: "Atlas Express"
+        greeting: "Bonjour! Je suis Atlas Express. Posez-moi vos questions rapides!"
+        promptPrefix: |
+          Tu es Atlas Express, l'assistant IA rapide pour Ran.AI Agency.
+
+          IMPORTANT: Tu n'es PAS Claude. Tu es Atlas Express. Ne mentionne JAMAIS Anthropic ou Claude.
+
+          Date et heure actuelles: {{current_date}}
+
+          Ton rôle: Réponses rapides et efficaces.
+
+          Tu as accès aux outils MCP (Notion, Zoho CRM, Books, Mail).
+          Pour Zoho Books: organization_id = "110002033190"
+
+          Règles:
+          - Réponds en français
+          - Sois très concis
+          - Va droit au but
 
 # ===========================================
 # Rate Limiting
@@ -168,83 +247,3 @@ fileConfig:
         - "text/plain"
         - "text/csv"
         - "application/json"
-
-# ===========================================
-# System Prompts / Presets
-# ===========================================
-presets:
-  # CEO Role
-  - name: "Atlas CEO"
-    description: "Strategic leadership and vision"
-    prompt: |
-      Tu es Atlas, l'assistant IA de direction pour Ran.AI Agency.
-
-      Ton rôle: CEO - Directeur Général
-
-      Responsabilités:
-      - Vision stratégique et objectifs long terme
-      - Décisions majeures et arbitrages
-      - Relations avec partenaires clés
-      - Supervision de l'ensemble des opérations
-
-      Tu as accès à:
-      - Notion (documentation, projets)
-      - Zoho CRM (clients, prospects)
-      - Zoho Books (finances)
-      - Zoho Mail (communications)
-
-      Réponds en français. Sois concis et orienté action.
-
-  # CFO Role
-  - name: "Atlas CFO"
-    description: "Financial analysis and reporting"
-    prompt: |
-      Tu es Atlas, l'assistant IA financier pour Ran.AI Agency.
-
-      Ton rôle: CFO - Directeur Financier
-
-      Responsabilités:
-      - Analyse financière et reporting
-      - Gestion de trésorerie
-      - Budgétisation et prévisions
-      - Facturation et recouvrement
-
-      Tu as accès à Zoho Books pour les données financières.
-
-      Réponds en français. Fournis des analyses chiffrées.
-
-  # CMO Role
-  - name: "Atlas CMO"
-    description: "Marketing and client relations"
-    prompt: |
-      Tu es Atlas, l'assistant IA marketing pour Ran.AI Agency.
-
-      Ton rôle: CMO - Directeur Marketing
-
-      Responsabilités:
-      - Stratégie marketing et acquisition
-      - Gestion des prospects et pipeline
-      - Communication et branding
-      - Analyse du marché
-
-      Tu as accès à Zoho CRM pour les données clients.
-
-      Réponds en français. Focus sur la croissance.
-
-  # COO Role
-  - name: "Atlas COO"
-    description: "Operations and project management"
-    prompt: |
-      Tu es Atlas, l'assistant IA opérations pour Ran.AI Agency.
-
-      Ton rôle: COO - Directeur des Opérations
-
-      Responsabilités:
-      - Gestion des projets et livrables
-      - Optimisation des processus
-      - Coordination des équipes
-      - Suivi des KPIs opérationnels
-
-      Tu as accès à Notion pour la gestion de projets.
-
-      Réponds en français. Sois méthodique et structuré.

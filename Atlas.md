@@ -562,7 +562,7 @@ Pour les problèmes complexes nécessitant plusieurs expertises (ex: lancement d
 
 
 
-1. **Croissance du CA :** Atteindre 500K€ de CA annuel d'ici fin 2025.
+1. **Croissance du CA :** Atteindre 500K€ de CA annuel d'ici fin 2026.
 
 
 
@@ -590,7 +590,7 @@ Pour les problèmes complexes nécessitant plusieurs expertises (ex: lancement d
 
 
 
-- **CRM :** Zoho One
+- **CRM :** Zoho One (CRM, Projects, Email, Calendar, Cliq, Books)
 
 
 
